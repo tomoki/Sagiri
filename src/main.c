@@ -22,6 +22,7 @@ int main(int argc, char** argv)
     rewind(f);
     // for NULL, +1
     s.source = malloc(fsize + sizeof(char));
+    s.source_len = fsize;
     fread(s.source, fsize, 1, f);
 
     if ((error_code = lex(&s)) != 0) {
