@@ -11,8 +11,7 @@ struct state {
     struct token *tokens;
     int tokens_len;
 
-    // FIXME: How should we store it?
-    struct ast *asts;
+    struct ast *toplevel_ast;
 };
 
 #endif

@@ -19,9 +19,9 @@ $(EXE): $(OBJS)
 
 $(BIN_DIR)/%.c.o: $(ROOT)/%.c
 	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
-	$(CC) $(CLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
 	- rm $(OBJS)
 
-.PHONY: clean all
+.PHONY: clean

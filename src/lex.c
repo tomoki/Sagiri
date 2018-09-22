@@ -118,17 +118,9 @@ int lex(struct state* s)
     s->tokens = malloc(sizeof(struct token) * 10);
     do_lex(&c, s);
 
-    for (int i = 0; i < s->tokens_len; i++) {
-        fprintf(stderr, "%d -> type = %d, value = %d\n", i, s->tokens[i].type, s->tokens[i].value.integer_value);
-    }
+    // for (int i = 0; i < s->tokens_len; i++) {
+    //     fprintf(stderr, "%d -> type = %d, value = %d\n", i, s->tokens[i].type, s->tokens[i].value.integer_value);
+    // }
 
-    // // Just for testing
-    // // return 1;
-    // s->tokens = malloc(sizeof(struct token) * 10);
-    // s->tokens_len = 3;
-    // s->tokens[0].type = RETURN_TOKEN;
-    // s->tokens[1].type = INTEGER_TOKEN;
-    // s->tokens[1].value.integer_value = 42;
-    // s->tokens[2].type = SEMICOLON_TOKEN;
     return 0;
 }
