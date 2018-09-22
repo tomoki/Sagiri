@@ -5,7 +5,7 @@ struct token;
 struct ast;
 
 struct state {
-    char* source;
+    char *source;
     int source_len;
 
     struct token *tokens;
