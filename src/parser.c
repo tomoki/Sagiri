@@ -11,11 +11,43 @@ void expect(struct token* t, enum token_type e)
 {
     if (t == NULL) {
         fprintf(stderr, "Token is NULL");
-        exit(1);
+        error("");
     }
     if (t->type != e) {
         fprintf(stderr, "%d is expected, but got %d\n", e, t->type);
-__asm__("int3");
+        error("");
+    }
+}
+
+void expect_keyword(struct token* t, enum keyword k)
+{
+    if (t == NULL) {
+        fprintf(stderr, "Token is NULL");
+        error("");
+    }
+    if (t->type != TOKEN_KEYWORD) {
+        fprintf(stderr, "keyword is expected, but got %d\n", t->type);
+        error("");
+    }
+    if (t->value.keyword_value != k) {
+        fprintf(stderr, "keyword %d is expected, but got %d\n", k, t->value.keyword_value);
+        error("");
+    }
+}
+
+void expect_punctuator(struct token* t, enum punctuator p)
+{
+    if (t == NULL) {
+        fprintf(stderr, "Token is NULL");
+        error("");
+    }
+    if (t->type != TOKEN_PUNCTUATOR) {
+        fprintf(stderr, "punctuator is expected, but got %d\n", t->type);
+        error("");
+    }
+    if (t->value.punctuator_value != p) {
+        fprintf(stderr, "punctuator %d is expected, but got %d\n", p, t->value.punctuator_value);
+        error("");
     }
 }
 
@@ -61,7 +93,7 @@ struct ast* integer_literal(struct cursor* c)
 struct ast* return_statement(struct cursor* c)
 {
     struct token* return_token = peek(c);
-    expect(return_token, RETURN_TOKEN);
+    expect_keyword(return_token, KEY_RETURN);
     proceed(c);
 
     // struct ast* exp = expression(c);
@@ -70,7 +102,7 @@ struct ast* return_statement(struct cursor* c)
         error("return exp");
 
     struct token* semicolon_token = peek(c);
-    expect(semicolon_token, SEMICOLON_TOKEN);
+    expect_punctuator(semicolon_token, PUNC_SEMICOLON);
     proceed(c);
 
     struct ast* ret = new_ast(RETURN_STATEMENT);
@@ -82,26 +114,26 @@ struct ast* function_definition(struct cursor* c)
 {
     // return type
     struct token* return_type = peek(c);
-    expect(return_type, IDENTIFIER_TOKEN);
+    // FIXME: identifier or keyword?
     proceed(c);
 
     struct token* function_name = peek(c);
-    expect(function_name, IDENTIFIER_TOKEN);
+    expect(function_name, TOKEN_IDENTIFIER);
     proceed(c);
 
     // (
     struct token* left_paren = peek(c);
-    expect(left_paren, LEFTPAREN_TOKEN);
+    expect_punctuator(left_paren, PUNC_LEFT_PAREN);
     proceed(c);
 
     // )
     struct token* right_paren = peek(c);
-    expect(right_paren, RIGHTPAREN_TOKEN);
+    expect_punctuator(right_paren, PUNC_RIGHT_PAREN);
     proceed(c);
 
     // {
     struct token* left_curly = peek(c);
-    expect(left_curly, LEFTCURLY_TOKEN);
+    expect_punctuator(left_curly, PUNC_LEFT_CURLY);
     proceed(c);
 
     // body
@@ -109,7 +141,7 @@ struct ast* function_definition(struct cursor* c)
 
     // }
     struct token* right_curly = peek(c);
-    expect(right_curly, RIGHTCURLY_TOKEN);
+    expect_punctuator(right_curly, PUNC_RIGHT_CURLY);
     proceed(c);
 
     struct ast* ret = new_ast(FUNCTION_DEFINITION);
