@@ -4,7 +4,8 @@ ROOT = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 SRCS =  src/main.c \
 		src/lex.c \
 		src/parser.c \
-		src/compile.c
+		src/compile.c \
+		src/util.c \
 
 CFLAGS = -Wall -g
 EXE = sagiri
