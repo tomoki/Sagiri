@@ -77,6 +77,7 @@ void proceed(struct cursor* c)
     c->where++;
 }
 
+struct ast* primary_expression(struct cursor*);
 struct ast* expression(struct cursor*);
 struct ast* return_statement(struct cursor*);
 struct ast* integer_literal(struct cursor*);
@@ -88,6 +89,161 @@ struct ast* integer_literal(struct cursor* c)
     struct ast* i = new_ast(INTEGER_LITERAL);
     i->value.integer_value = integer_token->value.integer_value;
     return i;
+}
+
+struct ast* primary_expression(struct cursor* c)
+{
+    // identifier
+    // constant
+    // string-literal
+    // ( expression)
+    struct token* next_token = peek(c);
+    if (next_token == NULL)
+        error("EOF until parsing expression\n");
+
+    if (next_token->type == TOKEN_IDENTIFIER)
+        error("not implemented");
+    else if (next_token->type == TOKEN_INTEGER)
+        return integer_literal(c);
+    else if (next_token->type == TOKEN_PUNCTUATOR && next_token->value.punctuator_value == PUNC_LEFT_PAREN) {
+        proceed(c); // ()
+        struct ast* ret = expression(c);
+        expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
+        proceed(c);
+        return ret;
+    }
+    error("Failed to parse primary_expression\n");
+}
+
+struct ast* postfix_expression(struct cursor* c)
+{
+    // primary-expression
+    // postfix-expression [ expression ]
+    // postfix-expression ( argument-expression-list opt )
+    // postfix-expression . identifier
+    // postfix-expression -> identifier
+    // postfix-expression ++
+    // postfix-expression --
+    // ( type-name ) { initializer-list }
+    // ( type-name ) { initializer-list , }
+    return primary_expression(c);
+}
+
+struct ast* unary_expression(struct cursor* c)
+{
+    // postfix-expression
+    // ++ unary-expression
+    // -- unary-expression
+    // unary-operator cast-expression
+    // sizeof unary-expression
+    // sizeof ( type-name )
+    return postfix_expression(c);
+}
+
+struct ast* cast_expression(struct cursor* c)
+{
+    // unary-expression
+    // ( type-name ) cast-expression
+    return unary_expression(c);
+}
+
+struct ast* multiplicative_expression(struct cursor* c)
+{
+    // cast-expression
+    // multiplicative-expression * cast-expression
+    // multiplicative-expression / cast-expression
+    // multiplicative-expression % cast-expression
+    return cast_expression(c);
+}
+
+struct ast* additive_expression(struct cursor* c)
+{
+    // multiplicative-expression
+    // additive-expression + multiplicative-expression
+    // additive-expression - multiplicative-expression
+    return multiplicative_expression(c);
+}
+
+struct ast* shift_expression(struct cursor* c)
+{
+    // additive-expression
+    // shift-expression << additive-expression
+    // shift-expression >> additive-expression
+    return additive_expression(c);
+}
+
+struct ast* relational_expression(struct cursor* c)
+{
+    // shift-expression
+    // relational-expression < shift-expression
+    // relational-expression > shift-expression
+    // relational-expression <= shift-expression
+    // relational-expression >= shift-expression
+    return shift_expression(c);
+}
+
+struct ast* equality_expression(struct cursor* c)
+{
+    // relational-expression
+    // equality-expression == relational-expression
+    // equality-expression != relational-expression
+    return relational_expression(c);
+}
+
+struct ast* and_expression(struct cursor* c)
+{
+    // equality-expression
+    // AND-expression & equality-expression
+    return equality_expression(c);
+}
+
+struct ast* exclusive_or_expression(struct cursor* c)
+{
+    // AND-expression
+    // exclusive-OR-expression ^ AND-expression
+    return and_expression(c);
+}
+
+struct ast* inclusive_or_expression(struct cursor* c)
+{
+    // exclusive-OR-expression
+    // inclusive-OR-expression | exclusive-OR-expression
+    return exclusive_or_expression(c);
+}
+
+struct ast* logical_and_expression(struct cursor* c)
+{
+    // inclusive-OR-expression
+    // logical-AND-expression && inclusive-OR-expression
+    return inclusive_or_expression(c);
+}
+
+struct ast* logical_or_expression(struct cursor* c)
+{
+    // logical-AND-expression
+    // logical-OR-expression || logical-AND-expression
+    return logical_and_expression(c);
+}
+
+struct ast* conditional_expression(struct cursor* c)
+{
+    // logical-OR-expression
+    // logical-OR-expression ? expression : conditional-expression
+    return logical_or_expression(c);
+}
+
+struct ast* assignment_expression(struct cursor* c)
+{
+    // conditional-expression
+    // unary-expression assignment-operator assignment-expression
+    return conditional_expression(c);
+}
+
+struct ast* expression(struct cursor* c)
+{
+    // assignment-expression
+    // expression , assignment-expression
+    return assignment_expression(c);
 }
 
 struct ast* return_statement(struct cursor* c)
