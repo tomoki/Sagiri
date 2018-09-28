@@ -168,7 +168,7 @@ int do_lex(struct cursor* c, struct state* s)
                     if (key_len == ident_len && strncmp(&c->code[c->where], key, key_len) == 0) {
                         c->where += ident_len;
                         s->tokens[k].type = TOKEN_KEYWORD;
-                        s->tokens[k].value.keyword_value = i;
+                        s->tokens[k].value.keyword = i;
                         k++;
                         is_keyword = 1;
                         break;
@@ -177,8 +177,8 @@ int do_lex(struct cursor* c, struct state* s)
                 if (!is_keyword) {
                     // Normal identifier
                     s->tokens[k].type = TOKEN_IDENTIFIER;
-                    s->tokens[k].value.identifier_value.start = &(c->code[c->where]);
-                    s->tokens[k].value.identifier_value.length = ident_len;
+                    s->tokens[k].value.identifier.start = &(c->code[c->where]);
+                    s->tokens[k].value.identifier.length = ident_len;
                     k++;
                     c->where += ident_len;
             }
@@ -193,7 +193,7 @@ int do_lex(struct cursor* c, struct state* s)
                     n = 10 * n + (c->code[c->where+j]-'0');
                 c->where += int_len;
                 s->tokens[k].type = TOKEN_INTEGER;
-                s->tokens[k].value.integer_value = n;
+                s->tokens[k].value.integer = n;
                 k++;
                 continue;
             }
@@ -207,7 +207,7 @@ int do_lex(struct cursor* c, struct state* s)
                 if (strncmp(&c->code[c->where], punc, punc_len) == 0) {
                     c->where += punc_len;
                     s->tokens[k].type = TOKEN_PUNCTUATOR;
-                    s->tokens[k].value.keyword_value = i;
+                    s->tokens[k].value.keyword = i;
                     k++;
                     is_punctuator = 1;
                 }

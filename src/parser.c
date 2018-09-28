@@ -29,8 +29,8 @@ void expect_keyword(struct token* t, enum keyword k)
         fprintf(stderr, "keyword is expected, but got %d\n", t->type);
         error("");
     }
-    if (t->value.keyword_value != k) {
-        fprintf(stderr, "keyword %d is expected, but got %d\n", k, t->value.keyword_value);
+    if (t->value.keyword != k) {
+        fprintf(stderr, "keyword %d is expected, but got %d\n", k, t->value.keyword);
         error("");
     }
 }
@@ -45,8 +45,8 @@ void expect_punctuator(struct token* t, enum punctuator p)
         fprintf(stderr, "punctuator is expected, but got %d\n", t->type);
         error("");
     }
-    if (t->value.punctuator_value != p) {
-        fprintf(stderr, "punctuator %d is expected, but got %d\n", p, t->value.punctuator_value);
+    if (t->value.punctuator != p) {
+        fprintf(stderr, "punctuator %d is expected, but got %d\n", p, t->value.punctuator);
         error("");
     }
 }
@@ -86,8 +86,8 @@ struct ast* integer_literal(struct cursor* c)
 {
     struct token* integer_token = peek(c);
     proceed(c);
-    struct ast* i = new_ast(INTEGER_LITERAL);
-    i->value.integer_value = integer_token->value.integer_value;
+    struct ast* i = new_ast(AST_INTEGER);
+    i->value.integer = integer_token->value.integer;
     return i;
 }
 
@@ -105,7 +105,7 @@ struct ast* primary_expression(struct cursor* c)
         error("not implemented");
     else if (next_token->type == TOKEN_INTEGER)
         return integer_literal(c);
-    else if (next_token->type == TOKEN_PUNCTUATOR && next_token->value.punctuator_value == PUNC_LEFT_PAREN) {
+    else if (next_token->type == TOKEN_PUNCTUATOR && next_token->value.punctuator == PUNC_LEFT_PAREN) {
         proceed(c); // ()
         struct ast* ret = expression(c);
         expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
@@ -165,14 +165,14 @@ struct ast* additive_expression(struct cursor* c)
     struct ast* left = multiplicative_expression(c);
     while (1) {
         struct token* op = peek(c);
-        if (op->type == TOKEN_PUNCTUATOR && op->value.punctuator_value == PUNC_PLUS) {
+        if (op->type == TOKEN_PUNCTUATOR && op->value.punctuator == PUNC_PLUS) {
             proceed(c);
             struct ast* right = multiplicative_expression(c);
             struct ast* new_left = new_ast(AST_ADD);
             new_left->value.binary_operator.left = left;
             new_left->value.binary_operator.right = right;
             left = new_left;
-        } else if(op->type == TOKEN_PUNCTUATOR && op->value.punctuator_value == PUNC_MINUS) {
+        } else if(op->type == TOKEN_PUNCTUATOR && op->value.punctuator == PUNC_MINUS) {
             proceed(c);
             struct ast* right = multiplicative_expression(c);
             struct ast* new_left = new_ast(AST_MINUS);
@@ -321,9 +321,9 @@ struct ast* function_definition(struct cursor* c)
     proceed(c);
 
     struct ast* ret = new_ast(FUNCTION_DEFINITION);
-    ret->value.function_definition_value.function_name = function_name->value.identifier_value.start;
-    ret->value.function_definition_value.function_name_length = function_name->value.identifier_value.length;
-    ret->value.function_definition_value.body = statement;
+    ret->value.function_definition.function_name = function_name->value.identifier.start;
+    ret->value.function_definition.function_name_length = function_name->value.identifier.length;
+    ret->value.function_definition.body = statement;
 
     return ret;
 }
@@ -331,8 +331,8 @@ struct ast* function_definition(struct cursor* c)
 struct ast* toplevel(struct cursor* c)
 {
     struct ast* top = new_ast(TOPLEVEL_AST);
-    top->value.toplevel_value.ast_len = 1;
-    top->value.toplevel_value.asts[0] = function_definition(c);
+    top->value.toplevel.ast_len = 1;
+    top->value.toplevel.asts[0] = function_definition(c);
     return top;
 }
 

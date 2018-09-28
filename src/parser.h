@@ -5,7 +5,7 @@ enum ast_type {
     TOPLEVEL_AST,
     FUNCTION_DEFINITION,
     RETURN_STATEMENT,
-    INTEGER_LITERAL,
+    AST_INTEGER,
     AST_ADD,
     AST_MINUS,
 };
@@ -18,19 +18,19 @@ struct ast {
         struct {
             struct ast* asts[100];
             int ast_len;
-        } toplevel_value;
+        } toplevel;
 
         // RETURN_STATEMENT
         struct ast* exp;
         // INTEGER_LITERAL
-        int integer_value;
+        int integer;
         // FUNCTION_DEFINITION
         struct {
             char* function_name;
             int function_name_length;
             struct ast* body;
             // TODO: add return type
-        } function_definition_value;
+        } function_definition;
 
         struct {
             struct ast* left;

@@ -110,13 +110,13 @@ enum token_type {
 struct token {
     enum token_type type;
     union value_type {
-        int integer_value;
+        int integer;
         struct {
             char* start;
             int length;
-        } identifier_value;
-        enum keyword keyword_value;
-        enum punctuator punctuator_value;
+        } identifier;
+        enum keyword keyword;
+        enum punctuator punctuator;
     } value;
 };
 
