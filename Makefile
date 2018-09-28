@@ -25,4 +25,7 @@ $(BIN_DIR)/%.c.o: $(ROOT)/%.c
 clean:
 	- rm $(OBJS)
 
-.PHONY: clean
+test: $(EXE)
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/just-return.c $(ROOT)/test/startup.c $(ROOT)/test/case/just-return.expected
+
+.PHONY: clean test
