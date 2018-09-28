@@ -27,6 +27,9 @@ clean:
 
 test: $(EXE)
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/just-return.c $(ROOT)/test/startup.c
-	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/return-add-1-2.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/add1.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/add2.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/minus1.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/minus2.c $(ROOT)/test/startup.c
 
 .PHONY: clean test
