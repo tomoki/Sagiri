@@ -5,7 +5,8 @@ enum ast_type {
     TOPLEVEL_AST,
     FUNCTION_DEFINITION,
     RETURN_STATEMENT,
-    INTEGER_LITERAL
+    INTEGER_LITERAL,
+    AST_ADD,
 };
 
 struct ast {
@@ -29,6 +30,11 @@ struct ast {
             struct ast* body;
             // TODO: add return type
         } function_definition_value;
+
+        struct {
+            struct ast* left;
+            struct ast* right;
+        } binary_operator;
     } value;
 };
 

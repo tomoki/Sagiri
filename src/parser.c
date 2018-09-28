@@ -113,6 +113,7 @@ struct ast* primary_expression(struct cursor* c)
         return ret;
     }
     error("Failed to parse primary_expression\n");
+    return NULL; // surpress warning
 }
 
 struct ast* postfix_expression(struct cursor* c)
@@ -158,10 +159,20 @@ struct ast* multiplicative_expression(struct cursor* c)
 
 struct ast* additive_expression(struct cursor* c)
 {
+    struct ast* left = multiplicative_expression(c);
+    struct token* op = peek(c);
+    if (op->type == TOKEN_PUNCTUATOR && op->value.punctuator_value == PUNC_PLUS) {
+        proceed(c);
+        struct ast* right = additive_expression(c);
+        struct ast* ret = new_ast(AST_ADD);
+        ret->value.binary_operator.left = left;
+        ret->value.binary_operator.right = right;
+        return ret;
+    }
     // multiplicative-expression
     // additive-expression + multiplicative-expression
     // additive-expression - multiplicative-expression
-    return multiplicative_expression(c);
+    return left;
 }
 
 struct ast* shift_expression(struct cursor* c)
@@ -252,8 +263,7 @@ struct ast* return_statement(struct cursor* c)
     expect_keyword(return_token, KEY_RETURN);
     proceed(c);
 
-    // struct ast* exp = expression(c);
-    struct ast* exp = integer_literal(c);
+    struct ast* exp = expression(c);
     if (exp == NULL)
         error("return exp");
 

@@ -153,10 +153,10 @@ int do_lex(struct cursor* c, struct state* s)
 {
     int k = 0;
     while (c->code[c->where] != '\0') {
-        fprintf(stderr, "%s\n", c->code + c->where);
         // Skip spaces
         while (isspace(c->code[c->where]))
             c->where++;
+
         {
             // try identifier
             int ident_len = read_identifier(c);
@@ -230,12 +230,8 @@ int lex(struct state* s)
     c.code = s->source;
     c.where = 0;
     c.length = s->source_len;
-    s->tokens = malloc(sizeof(struct token) * 10);
+    s->tokens = malloc(sizeof(struct token) * 100);
     do_lex(&c, s);
-
-    // for (int i = 0; i < s->tokens_len; i++) {
-    //     fprintf(stderr, "%d -> type = %d, value = %d\n", i, s->tokens[i].type, s->tokens[i].value.integer_value);
-    // }
 
     return 0;
 }

@@ -16,6 +16,14 @@ void compile_rec(struct ast* a, struct state* s)
                 "\tret\n"
             );
             break;
+        case AST_ADD:
+            compile_rec(a->value.binary_operator.left, s);
+            compile_rec(a->value.binary_operator.right, s);
+            printf("\tpopq %%rax\n"
+                   "\tpopq %%rbx\n"
+                   "\taddq %%rbx, %%rax\n"
+                   "\tpushq %%rax\n");
+            break;
         case INTEGER_LITERAL:
             printf("\tpushq $%d\n", a->value.integer_value);
             break;
