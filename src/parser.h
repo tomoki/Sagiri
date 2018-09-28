@@ -7,6 +7,7 @@ enum ast_type {
     RETURN_STATEMENT,
     INTEGER_LITERAL,
     AST_ADD,
+    AST_MINUS,
 };
 
 struct ast {

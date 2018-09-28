@@ -159,19 +159,29 @@ struct ast* multiplicative_expression(struct cursor* c)
 
 struct ast* additive_expression(struct cursor* c)
 {
-    struct ast* left = multiplicative_expression(c);
-    struct token* op = peek(c);
-    if (op->type == TOKEN_PUNCTUATOR && op->value.punctuator_value == PUNC_PLUS) {
-        proceed(c);
-        struct ast* right = additive_expression(c);
-        struct ast* ret = new_ast(AST_ADD);
-        ret->value.binary_operator.left = left;
-        ret->value.binary_operator.right = right;
-        return ret;
-    }
     // multiplicative-expression
     // additive-expression + multiplicative-expression
     // additive-expression - multiplicative-expression
+    struct ast* left = multiplicative_expression(c);
+    while (1) {
+        struct token* op = peek(c);
+        if (op->type == TOKEN_PUNCTUATOR && op->value.punctuator_value == PUNC_PLUS) {
+            proceed(c);
+            struct ast* right = multiplicative_expression(c);
+            struct ast* new_left = new_ast(AST_ADD);
+            new_left->value.binary_operator.left = left;
+            new_left->value.binary_operator.right = right;
+            left = new_left;
+        } else if(op->type == TOKEN_PUNCTUATOR && op->value.punctuator_value == PUNC_MINUS) {
+            proceed(c);
+            struct ast* right = multiplicative_expression(c);
+            struct ast* new_left = new_ast(AST_MINUS);
+            new_left->value.binary_operator.left = left;
+            new_left->value.binary_operator.right = right;
+            left = new_left;
+        } else
+            break;
+    }
     return left;
 }
 

@@ -19,11 +19,23 @@ void compile_rec(struct ast* a, struct state* s)
         case AST_ADD:
             compile_rec(a->value.binary_operator.left, s);
             compile_rec(a->value.binary_operator.right, s);
-            printf("\tpopq %%rax\n"
-                   "\tpopq %%rbx\n"
+            // left -> right -> stack top
+            // rbx = right, rax = left
+            printf("\tpopq %%rbx\n"
+                   "\tpopq %%rax\n"
                    "\taddq %%rbx, %%rax\n"
                    "\tpushq %%rax\n");
             break;
+        case AST_MINUS:
+            compile_rec(a->value.binary_operator.left, s);
+            compile_rec(a->value.binary_operator.right, s);
+            // rbx = right, rax = left
+            printf("\tpopq %%rbx\n"
+                   "\tpopq %%rax\n"
+                   "\tsubq %%rbx, %%rax\n"
+                   "\tpushq %%rax\n");
+            break;
+
         case INTEGER_LITERAL:
             printf("\tpushq $%d\n", a->value.integer_value);
             break;
