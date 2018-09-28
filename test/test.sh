@@ -1,7 +1,7 @@
 compiler=$1
 program=$2
 startup=$3
-expected=$4
+expected=$2.expected
 time=2s
 
 echo "$program"

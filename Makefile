@@ -26,6 +26,7 @@ clean:
 	- rm $(OBJS)
 
 test: $(EXE)
-	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/just-return.c $(ROOT)/test/startup.c $(ROOT)/test/case/just-return.expected
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/just-return.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/return-add-1-2.c $(ROOT)/test/startup.c
 
 .PHONY: clean test
