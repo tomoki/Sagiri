@@ -123,4 +123,8 @@ struct token {
 struct state;
 int lex(struct state*);
 
+int is_keyword(struct token*, enum keyword);
+int is_punctuator(struct token*, enum punctuator);
+
+
 #endif

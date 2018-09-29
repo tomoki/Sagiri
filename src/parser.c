@@ -108,11 +108,11 @@ struct ast* primary_expression(struct cursor* c)
         error("not implemented");
     else if (next_token->type == TOKEN_INTEGER)
         return integer_literal(c);
-    else if (next_token->type == TOKEN_PUNCTUATOR && next_token->value.punctuator == PUNC_LEFT_PAREN) {
-        proceed(c); // ()
+    else if (is_punctuator(next_token, PUNC_LEFT_PAREN)) {
+        proceed(c); // (
         struct ast* ret = expression(c);
         expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
-        proceed(c);
+        proceed(c); // )
         return ret;
     }
     error("Failed to parse primary_expression\n");
@@ -168,14 +168,14 @@ struct ast* additive_expression(struct cursor* c)
     struct ast* left = multiplicative_expression(c);
     while (1) {
         struct token* op = peek(c);
-        if (op->type == TOKEN_PUNCTUATOR && op->value.punctuator == PUNC_PLUS) {
+        if (is_punctuator(op, PUNC_PLUS)) {
             proceed(c);
             struct ast* right = multiplicative_expression(c);
             struct ast* new_left = new_ast(AST_ADD);
             new_left->value.binary_operator.left = left;
             new_left->value.binary_operator.right = right;
             left = new_left;
-        } else if(op->type == TOKEN_PUNCTUATOR && op->value.punctuator == PUNC_MINUS) {
+        } else if (is_punctuator(op, PUNC_MINUS)) {
             proceed(c);
             struct ast* right = multiplicative_expression(c);
             struct ast* new_left = new_ast(AST_MINUS);
@@ -302,7 +302,7 @@ struct ast* compound_statement(struct cursor* c)
 
     while (1) {
         struct token* next_token = peek(c);
-        if (next_token != NULL && next_token->type == TOKEN_PUNCTUATOR && next_token->value.punctuator == PUNC_RIGHT_CURLY)
+        if (is_punctuator(next_token, PUNC_RIGHT_CURLY))
             break;
         // FIXME: add declaration
         ret->value.compound_statement.asts[ret->value.compound_statement.ast_len++] = statement(c);
@@ -325,7 +325,27 @@ struct ast* selection_statement(struct cursor* c)
     // if ( expression ) statement
     // if ( expression ) statement else statement
     // switch ( expression ) statement
-    error("not implemented");
+    struct token* first_token = peek(c);
+    if (is_keyword(first_token, KEY_IF)) {
+        // if
+        proceed(c);
+        // (
+        expect_punctuator(peek(c), PUNC_LEFT_PAREN);
+        proceed(c);
+        // expression
+        struct ast* cond_exp = expression(c);
+        // )
+        expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
+        proceed(c);
+        struct ast* true_statement = statement(c);
+
+        struct token* next_token = peek(c);
+        if (next_token != NULL && next_token->type == TOKEN_KEYWORD && next_token->value.keyword == KEY_ELSE) {
+            proceed(c);
+
+        }
+
+    }
 }
 
 struct ast* iteration_statement(struct cursor* c)
@@ -344,7 +364,7 @@ struct ast* jump_statement(struct cursor* c)
     // break ;
     // return expression opt ;
     struct token* first_token = peek(c);
-    if (first_token->type == TOKEN_KEYWORD && first_token->value.keyword == KEY_RETURN) {
+    if (is_keyword(first_token, KEY_RETURN)) {
         struct token* return_token = peek(c);
         expect_keyword(return_token, KEY_RETURN);
         proceed(c);
@@ -377,34 +397,29 @@ struct ast* statement(struct cursor* c)
         error("Reach EOF until parsing statement");
 
     // compound-statement
-    if (first_token->type == TOKEN_PUNCTUATOR && first_token->value.punctuator == PUNC_LEFT_CURLY)
+    if (is_punctuator(first_token, PUNC_LEFT_PAREN))
         return compound_statement(c);
 
     // jump-statement
-    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_GOTO ||
-                                               first_token->value.keyword == KEY_CONTINUE ||
-                                               first_token->value.keyword == KEY_BREAK ||
-                                               first_token->value.keyword == KEY_RETURN))
+    if (is_keyword(first_token, KEY_GOTO) || is_keyword(first_token, KEY_CONTINUE) ||
+        is_keyword(first_token, KEY_BREAK) || is_keyword(first_token, KEY_RETURN))
         return jump_statement(c);
 
     // iteration-statement
-    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_WHILE ||
-                                               first_token->value.keyword == KEY_DO ||
-                                               first_token->value.keyword == KEY_FOR))
+    if (is_keyword(first_token, KEY_WHILE) || is_keyword(first_token, KEY_DO) || is_keyword(first_token, KEY_FOR))
         return iteration_statement(c);
 
     // selection-statement
-    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_IF ||
-                                               first_token->value.keyword == KEY_SWITCH))
+    if (is_keyword(first_token, KEY_IF) || is_keyword(first_token, KEY_SWITCH))
         return selection_statement(c);
 
     // labeled-statement with keyword label
-    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_CASE || first_token->value.keyword == KEY_DEFAULT))
+    if (is_keyword(first_token, KEY_CASE) || is_keyword(first_token, KEY_DEFAULT))
         return labeled_statement(c);
     // custom label?
     if (first_token->type == TOKEN_IDENTIFIER) {
         struct token* second_token = peek_n(c, 1);
-        if (second_token != NULL && second_token->type == TOKEN_PUNCTUATOR && second_token->value.punctuator == PUNC_COLON)
+        if (is_punctuator(second_token, PUNC_COLON))
             return labeled_statement(c);
     }
 

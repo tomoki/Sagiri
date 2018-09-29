@@ -115,6 +115,16 @@ char punctuators[NUMBER_OF_PUNCTUATORS][10] = {
 };
 
 
+int is_keyword(struct token* t, enum keyword k)
+{
+     return t != NULL && t->type == TOKEN_KEYWORD && t->value.keyword == k;
+}
+
+int is_punctuator(struct token* t, enum punctuator p)
+{
+     return t != NULL && t->type == TOKEN_PUNCTUATOR && t->value.punctuator == p;
+}
+
 int nondigit(char c)
 {
     return c == '_' ||
