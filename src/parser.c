@@ -65,18 +65,16 @@ struct ast* new_ast(enum ast_type type)
     return ret;
 }
 
-struct token* peek(struct cursor* c)
+struct token* peek_n(struct cursor* c, int n)
 {
-    if (c->where < c->length)
-        return &(c->tokens[c->where]);
+    if (c->where + n < c->length)
+        return &(c->tokens[c->where + n]);
     return NULL;
 }
 
-struct token* peek_n(struct cursor* c, int n)
+struct token* peek(struct cursor* c)
 {
-    if (c->where + n< c->length)
-        return &(c->tokens[c->where + n]);
-    return NULL;
+    return peek_n(c, 0);
 }
 
 void proceed(struct cursor* c)
