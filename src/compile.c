@@ -46,15 +46,17 @@ void compile_rec(struct ast* a, struct state* s)
             break;
         case AST_IF_ELSE_STATEMENT:
             compile_rec(a->value.if_else_statement.cond_expression, s);
+            int fl = s->unique_label++;
+            int el = s->unique_label++;
             printf("\tpopq %%rax\n"
                    "\tcmpq $0, %%rax\n"
-                   "\tje .L2\n");
+                   "\tje .L%d\n", fl);
             compile_rec(a->value.if_else_statement.true_statement, s);
-            printf("\tjmp .L3\n");
-            printf(".L2:\n");
+            printf("\tjmp .L%d\n", el);
+            printf(".L%d:\n", fl);
             if (a->value.if_else_statement.false_statement)
                 compile_rec(a->value.if_else_statement.false_statement, s);
-            printf(".L3:\n");
+            printf(".L%d:\n", el);
             break;
         default:
             error("not implemented");
@@ -88,6 +90,7 @@ void compile_toplevel(struct ast* a, struct state* s)
 
 int compile(struct state* s)
 {
+    s->unique_label = 1;
     compile_toplevel(s->toplevel_ast, s);
     return 0;
 }

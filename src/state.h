@@ -12,6 +12,7 @@ struct state {
     int tokens_len;
 
     struct ast *toplevel_ast;
+    int unique_label;
 };
 
 #endif
