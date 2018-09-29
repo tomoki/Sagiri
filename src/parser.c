@@ -72,15 +72,20 @@ struct token* peek(struct cursor* c)
     return NULL;
 }
 
+struct token* peek_n(struct cursor* c, int n)
+{
+    if (c->where + n< c->length)
+        return &(c->tokens[c->where + n]);
+    return NULL;
+}
+
 void proceed(struct cursor* c)
 {
     c->where++;
 }
 
-struct ast* primary_expression(struct cursor*);
+// --------------------- EXPRESSIONS -----------------------------
 struct ast* expression(struct cursor*);
-struct ast* return_statement(struct cursor*);
-struct ast* integer_literal(struct cursor*);
 
 struct ast* integer_literal(struct cursor* c)
 {
@@ -267,23 +272,125 @@ struct ast* expression(struct cursor* c)
     return assignment_expression(c);
 }
 
-struct ast* return_statement(struct cursor* c)
+
+// ---------------- STATEMENT -----------------------------
+
+struct ast* labeled_statement(struct cursor* c)
 {
-    struct token* return_token = peek(c);
-    expect_keyword(return_token, KEY_RETURN);
-    proceed(c);
+    // identifier : statement
+    // case constant-expression : statement
+    // default : statement
+    error("not implemented");
+}
 
-    struct ast* exp = expression(c);
-    if (exp == NULL)
-        error("return exp");
+struct ast* compound_statement(struct cursor* c)
+{
+    // { block-item-list opt }
+    // block-item-list:
+    //    block-item
+    //    block-item-list block-item
+    // block-item:
+    //    declaration
+    //    statement
+    error("not implemented");
+}
 
-    struct token* semicolon_token = peek(c);
-    expect_punctuator(semicolon_token, PUNC_SEMICOLON);
-    proceed(c);
+struct ast* expression_statement(struct cursor* c)
+{
+    // expression opt;
+    error("not implemented");
+}
 
-    struct ast* ret = new_ast(RETURN_STATEMENT);
-    ret->value.exp = exp;
-    return ret;
+struct ast* selection_statement(struct cursor* c)
+{
+    // if ( expression ) statement
+    // if ( expression ) statement else statement
+    // switch ( expression ) statement
+    error("not implemented");
+}
+
+struct ast* iteration_statement(struct cursor* c)
+{
+    // while ( expression ) statement
+    // do statement while ( expression ) ;
+    // for ( expression opt ; expression opt ; expression opt ) statement
+    // for ( declaration expression opt ; expression opt ) statement
+    error("not implemented");
+}
+
+struct ast* jump_statement(struct cursor* c)
+{
+    // goto identifier ;
+    // continue ;
+    // break ;
+    // return expression opt ;
+    struct token* first_token = peek(c);
+    if (first_token->type == TOKEN_KEYWORD && first_token->value.keyword == KEY_RETURN) {
+        struct token* return_token = peek(c);
+        expect_keyword(return_token, KEY_RETURN);
+        proceed(c);
+
+        struct ast* exp = expression(c);
+
+        struct token* semicolon_token = peek(c);
+        expect_punctuator(semicolon_token, PUNC_SEMICOLON);
+        proceed(c);
+
+        struct ast* ret = new_ast(RETURN_STATEMENT);
+        ret->value.exp = exp;
+        return ret;
+    }
+
+    error("not implemented");
+}
+
+struct ast* statement(struct cursor* c)
+{
+    // labeled-statement
+    // compound-statement
+    // expression-statement
+    // selection-statement
+    // iteration-statement
+    // jump-statement
+
+    struct token* first_token = peek(c);
+    if (first_token == NULL)
+        error("Reach EOF until parsing statement");
+
+    // compound-statement
+    if (first_token->type == TOKEN_PUNCTUATOR && first_token->value.punctuator == PUNC_LEFT_CURLY)
+        return compound_statement(c);
+
+    // jump-statement
+    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_GOTO ||
+                                               first_token->value.keyword == KEY_CONTINUE ||
+                                               first_token->value.keyword == KEY_BREAK ||
+                                               first_token->value.keyword == KEY_RETURN))
+        return jump_statement(c);
+
+    // iteration-statement
+    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_WHILE ||
+                                               first_token->value.keyword == KEY_DO ||
+                                               first_token->value.keyword == KEY_FOR))
+        return iteration_statement(c);
+
+    // selection-statement
+    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_IF ||
+                                               first_token->value.keyword == KEY_SWITCH))
+        return selection_statement(c);
+
+    // labeled-statement with keyword label
+    if (first_token->type == TOKEN_KEYWORD && (first_token->value.keyword == KEY_CASE || first_token->value.keyword == KEY_DEFAULT))
+        return labeled_statement(c);
+    // custom label?
+    if (first_token->type == TOKEN_IDENTIFIER) {
+        struct token* second_token = peek_n(c, 1);
+        if (second_token != NULL && second_token->type == TOKEN_PUNCTUATOR && second_token->value.punctuator == PUNC_COLON)
+            return labeled_statement(c);
+    }
+
+    // expression statement
+    return expression_statement(c);
 }
 
 struct ast* function_definition(struct cursor* c)
@@ -313,7 +420,7 @@ struct ast* function_definition(struct cursor* c)
     proceed(c);
 
     // body
-    struct ast* statement = return_statement(c);
+    struct ast* st = statement(c);
 
     // }
     struct token* right_curly = peek(c);
@@ -323,7 +430,7 @@ struct ast* function_definition(struct cursor* c)
     struct ast* ret = new_ast(FUNCTION_DEFINITION);
     ret->value.function_definition.function_name = function_name->value.identifier.start;
     ret->value.function_definition.function_name_length = function_name->value.identifier.length;
-    ret->value.function_definition.body = statement;
+    ret->value.function_definition.body = st;
 
     return ret;
 }
