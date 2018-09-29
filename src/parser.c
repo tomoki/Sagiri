@@ -327,25 +327,30 @@ struct ast* selection_statement(struct cursor* c)
     // switch ( expression ) statement
     struct token* first_token = peek(c);
     if (is_keyword(first_token, KEY_IF)) {
+        struct ast* ret = new_ast(AST_IF_ELSE_STATEMENT);
         // if
         proceed(c);
         // (
         expect_punctuator(peek(c), PUNC_LEFT_PAREN);
         proceed(c);
         // expression
-        struct ast* cond_exp = expression(c);
+        ret->value.if_else_statement.cond_expression = expression(c);
         // )
         expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
         proceed(c);
-        struct ast* true_statement = statement(c);
+        ret->value.if_else_statement.true_statement = statement(c);
 
         struct token* next_token = peek(c);
         if (next_token != NULL && next_token->type == TOKEN_KEYWORD && next_token->value.keyword == KEY_ELSE) {
-            proceed(c);
+            proceed(c); // else
+            ret->value.if_else_statement.false_statement = statement(c);
+        } else
+            ret->value.if_else_statement.false_statement = NULL;
 
-        }
-
+        return ret;
     }
+    // switch
+    error("not implemented");
 }
 
 struct ast* iteration_statement(struct cursor* c)

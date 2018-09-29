@@ -2,6 +2,7 @@
 
 #include "parser.h"
 #include "state.h"
+#include "util.h"
 
 #include <stdio.h>
 
@@ -42,6 +43,21 @@ void compile_rec(struct ast* a, struct state* s)
             for (int i = 0; i < a->value.compound_statement.ast_len; i++) {
                 compile_rec(a->value.compound_statement.asts[i], s);
             }
+            break;
+        case AST_IF_ELSE_STATEMENT:
+            compile_rec(a->value.if_else_statement.cond_expression, s);
+            printf("\tpopq %%rax\n"
+                   "\tcmpq $0, %%rax\n"
+                   "\tje .L2\n");
+            compile_rec(a->value.if_else_statement.true_statement, s);
+            printf("\tjmp .L3\n");
+            printf(".L2:\n");
+            if (a->value.if_else_statement.false_statement)
+                compile_rec(a->value.if_else_statement.false_statement, s);
+            printf(".L3:\n");
+            break;
+        default:
+            error("not implemented");
     }
 }
 

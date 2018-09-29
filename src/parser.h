@@ -9,6 +9,7 @@ enum ast_type {
     AST_ADD,
     AST_MINUS,
     AST_COMPOUND_STATEMENT,
+    AST_IF_ELSE_STATEMENT,
 };
 
 struct ast {
@@ -20,6 +21,12 @@ struct ast {
             struct ast* asts[100];
             int ast_len;
         } compound_statement;
+        // if-else statement
+        struct {
+            struct ast* cond_expression;
+            struct ast* true_statement;
+            struct ast* false_statement;
+        } if_else_statement;
 
         struct {
             struct ast* asts[100];

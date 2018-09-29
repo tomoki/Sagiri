@@ -34,5 +34,7 @@ test: $(EXE)
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/two-return.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/if-true.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/if-false.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/if-just-true.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/if-just-false.c $(ROOT)/test/startup.c
 
 .PHONY: clean test
