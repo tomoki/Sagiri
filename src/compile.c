@@ -38,6 +38,10 @@ void compile_rec(struct ast* a, struct state* s)
         case AST_INTEGER:
             printf("\tpushq $%d\n", a->value.integer);
             break;
+        case AST_COMPOUND_STATEMENT:
+            for (int i = 0; i < a->value.compound_statement.ast_len; i++) {
+                compile_rec(a->value.compound_statement.asts[i], s);
+            }
     }
 }
 

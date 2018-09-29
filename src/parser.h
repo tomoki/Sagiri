@@ -8,20 +8,26 @@ enum ast_type {
     AST_INTEGER,
     AST_ADD,
     AST_MINUS,
+    AST_COMPOUND_STATEMENT,
 };
 
 struct ast {
     enum ast_type type;
 
     union {
-        // TOPLEVEL_AST
+        // compound statement
+        struct {
+            struct ast* asts[100];
+            int ast_len;
+        } compound_statement;
+
         struct {
             struct ast* asts[100];
             int ast_len;
         } toplevel;
 
-        // RETURN_STATEMENT
         struct ast* exp;
+
         // INTEGER_LITERAL
         int integer;
         // FUNCTION_DEFINITION

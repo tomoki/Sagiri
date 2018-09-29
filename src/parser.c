@@ -273,6 +273,8 @@ struct ast* expression(struct cursor* c)
 
 // ---------------- STATEMENT -----------------------------
 
+struct ast* statement(struct cursor*);
+
 struct ast* labeled_statement(struct cursor* c)
 {
     // identifier : statement
@@ -290,7 +292,26 @@ struct ast* compound_statement(struct cursor* c)
     // block-item:
     //    declaration
     //    statement
-    error("not implemented");
+
+    struct ast* ret = new_ast(AST_COMPOUND_STATEMENT);
+    ret->value.compound_statement.ast_len = 0;
+
+    struct token* left_curly = peek(c);
+    expect_punctuator(left_curly, PUNC_LEFT_CURLY);
+    proceed(c);
+
+    while (1) {
+        struct token* next_token = peek(c);
+        if (next_token != NULL && next_token->type == TOKEN_PUNCTUATOR && next_token->value.punctuator == PUNC_RIGHT_CURLY)
+            break;
+        // FIXME: add declaration
+        ret->value.compound_statement.asts[ret->value.compound_statement.ast_len++] = statement(c);
+    }
+    struct token* right_curly = peek(c);
+    expect_punctuator(right_curly, PUNC_RIGHT_CURLY);
+    proceed(c);
+
+    return ret;
 }
 
 struct ast* expression_statement(struct cursor* c)
@@ -412,18 +433,8 @@ struct ast* function_definition(struct cursor* c)
     expect_punctuator(right_paren, PUNC_RIGHT_PAREN);
     proceed(c);
 
-    // {
-    struct token* left_curly = peek(c);
-    expect_punctuator(left_curly, PUNC_LEFT_CURLY);
-    proceed(c);
-
     // body
-    struct ast* st = statement(c);
-
-    // }
-    struct token* right_curly = peek(c);
-    expect_punctuator(right_curly, PUNC_RIGHT_CURLY);
-    proceed(c);
+    struct ast* st = compound_statement(c);
 
     struct ast* ret = new_ast(FUNCTION_DEFINITION);
     ret->value.function_definition.function_name = function_name->value.identifier.start;
