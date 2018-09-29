@@ -444,12 +444,13 @@ struct ast* function_definition(struct cursor* c)
     return ret;
 }
 
-struct ast* toplevel(struct cursor* c)
+struct ast* translation_unit(struct cursor* c)
 {
-    struct ast* top = new_ast(TOPLEVEL_AST);
-    top->value.toplevel.ast_len = 1;
-    top->value.toplevel.asts[0] = function_definition(c);
-    return top;
+    struct ast* translation_unit = new_ast(TOPLEVEL_AST);
+    while(peek(c) != NULL) {
+        translation_unit->value.toplevel.asts[translation_unit->value.toplevel.ast_len++] = function_definition(c);
+    }
+    return translation_unit;
 }
 
 int parse(struct state* s)
@@ -459,6 +460,6 @@ int parse(struct state* s)
     c.where = 0;
     c.length = s->tokens_len;
 
-    s->toplevel_ast = toplevel(&c);
+    s->toplevel_ast = translation_unit(&c);
     return 0;
 }
