@@ -191,9 +191,9 @@ int do_lex(struct cursor* c, struct state* s)
                     s->tokens[k].value.identifier.length = ident_len;
                     k++;
                     c->where += ident_len;
+                }
+                continue;
             }
-            continue;
-        }
         }
         {
             int int_len = read_integer(c);
@@ -225,9 +225,10 @@ int do_lex(struct cursor* c, struct state* s)
             if (is_punctuator)
                 continue;
         }
+
         if (c->code[c->where] != '\0') {
             fprintf(stderr, "%s was not eaten\n", &c->code[c->where]);
-        error("");
+            error("");
         }
     }
     s->tokens_len = k;
