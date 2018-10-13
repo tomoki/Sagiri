@@ -3,7 +3,7 @@ ROOT = $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 SRCS =  src/main.c \
 		src/lex.c \
-		src/parser.c \
+		src/parse.c \
 		src/compile.c \
 		src/util.c \
 
@@ -42,5 +42,6 @@ test: $(EXE)
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/multi-if3.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/multi-if4.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/variable-in-function.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/variable-in-function-use.c $(ROOT)/test/startup.c
 
 .PHONY: clean test

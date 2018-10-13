@@ -6,6 +6,7 @@ enum ast_type {
     FUNCTION_DEFINITION,
     RETURN_STATEMENT,
     AST_INTEGER,
+    AST_IDENTIFIER,
     AST_ADD,
     AST_MINUS,
     AST_COMPOUND_STATEMENT,
@@ -22,6 +23,7 @@ struct ast {
             struct ast* asts[100];
             int ast_len;
         } compound_statement;
+
         // if-else statement
         struct {
             struct ast* cond_expression;
@@ -38,6 +40,13 @@ struct ast {
 
         // INTEGER_LITERAL
         int integer;
+
+        // IDENTIFIER REFERENCE
+        struct {
+            char* name;
+            int length;
+        } identifier;
+
         // FUNCTION_DEFINITION
         struct {
             char* function_name;

@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "parse.h"
 #include "lex.h"
 
 #include "state.h"
@@ -104,9 +104,13 @@ struct ast* primary_expression(struct cursor* c)
     if (next_token == NULL)
         error("EOF until parsing expression\n");
 
-    if (next_token->type == TOKEN_IDENTIFIER)
-        error("not implemented");
-    else if (next_token->type == TOKEN_INTEGER)
+    if (next_token->type == TOKEN_IDENTIFIER) {
+        proceed(c);
+        struct ast* ret = new_ast(AST_IDENTIFIER);
+        ret->value.identifier.name = next_token->value.identifier.start;
+        ret->value.identifier.length = next_token->value.identifier.length;
+        return ret;
+    } else if (next_token->type == TOKEN_INTEGER)
         return integer_literal(c);
     else if (is_punctuator(next_token, PUNC_LEFT_PAREN)) {
         proceed(c); // (

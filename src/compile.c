@@ -1,6 +1,6 @@
 #include "compile.h"
 
-#include "parser.h"
+#include "parse.h"
 #include "state.h"
 #include "util.h"
 
@@ -60,6 +60,9 @@ void compile_rec(struct ast* a, struct state* s)
             break;
         case AST_DECLARATION:
             // FIXME: Implement here
+            break;
+        case AST_IDENTIFIER:
+            printf("\tpushq $%d\n", 1312312);
             break;
         default:
             error("not implemented");

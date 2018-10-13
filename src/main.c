@@ -1,7 +1,7 @@
 #include "compile.h"
 #include "state.h"
 #include "lex.h"
-#include "parser.h"
+#include "parse.h"
 
 #include <stdio.h>
 #include <stdlib.h>
