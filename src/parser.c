@@ -274,6 +274,7 @@ struct ast* expression(struct cursor* c)
 // ---------------- STATEMENT -----------------------------
 
 struct ast* statement(struct cursor*);
+struct ast* declaration(struct cursor*);
 
 struct ast* labeled_statement(struct cursor* c)
 {
@@ -304,9 +305,41 @@ struct ast* compound_statement(struct cursor* c)
         struct token* next_token = peek(c);
         if (is_punctuator(next_token, PUNC_RIGHT_CURLY))
             break;
-        // FIXME: add declaration
-        ret->value.compound_statement.asts[ret->value.compound_statement.ast_len++] = statement(c);
+
+        // FIXME: allow tyoedef
+        if (// storage-class-specifier
+            is_keyword(next_token, KEY_TYPEDEF)  ||
+            is_keyword(next_token, KEY_EXTERN)   ||
+            is_keyword(next_token, KEY_STATIC)   ||
+            is_keyword(next_token, KEY_AUTO)     ||
+            is_keyword(next_token, KEY_REGISTER) ||
+            // type-specifier
+            is_keyword(next_token, KEY_VOID)     ||
+            is_keyword(next_token, KEY_CHAR)     ||
+            is_keyword(next_token, KEY_SHORT)    ||
+            is_keyword(next_token, KEY_INT)      ||
+            is_keyword(next_token, KEY_LONG)     ||
+            is_keyword(next_token, KEY_FLOAT)    ||
+            is_keyword(next_token, KEY_DOUBLE)   ||
+            is_keyword(next_token, KEY_SIGNED)   ||
+            is_keyword(next_token, KEY_UNSIGNED) ||
+            is_keyword(next_token, KEY__BOOL)    ||
+            is_keyword(next_token, KEY__COMPLEX) ||
+            is_keyword(next_token, KEY_STRUCT)   ||
+            is_keyword(next_token, KEY_UNION)    ||
+            is_keyword(next_token, KEY_ENUM)     ||
+            // or typedef name....
+            // type-qualifier
+            is_keyword(next_token, KEY_CONST)    ||
+            is_keyword(next_token, KEY_RESTRICT) ||
+            is_keyword(next_token, KEY_VOLATILE) ||
+            // function-specifier
+            is_keyword(next_token, KEY_INLINE))
+            ret->value.compound_statement.asts[ret->value.compound_statement.ast_len++] = declaration(c);
+        else
+            ret->value.compound_statement.asts[ret->value.compound_statement.ast_len++] = statement(c);
     }
+
     struct token* right_curly = peek(c);
     expect_punctuator(right_curly, PUNC_RIGHT_CURLY);
     proceed(c);
@@ -430,6 +463,46 @@ struct ast* statement(struct cursor* c)
 
     // expression statement
     return expression_statement(c);
+}
+
+struct ast* declaration(struct cursor* c)
+{
+    // declaration-specifiers init-declarator-list opt ;
+
+    // declaration-specifiers:
+    //   storage-class-specifier declaration-specifiers opt
+    //   type-specifier declaration-specifiers opt
+    //   type-qualifier declaration-specifiers opt
+    //   function-specifier declaration-specifiers opt
+
+    // init-declarator-list:
+    //   init-declarator
+    //   init-declarator-list , init-declarator
+
+    // init-declarator:
+    //   declarator
+    //   declarator = initializer
+
+
+    // FIXME: Assume it is integer.
+    expect_keyword(peek(c), KEY_INT);
+    proceed(c);
+
+    struct token* ident = peek(c);
+    proceed(c);
+    if (ident->type != TOKEN_IDENTIFIER)
+        error("Found non identifier on declaration");
+
+    struct ast* ret = new_ast(AST_DECLARATION);
+    if (is_punctuator(peek(c), PUNC_EQUAL)) {
+        proceed(c);
+        ret->value.declaration.initializer = assignment_expression(c);
+    } else
+        ret->value.declaration.initializer = 0;
+
+    expect_punctuator(peek(c), PUNC_SEMICOLON);
+    proceed(c);
+    return ret;
 }
 
 struct ast* function_definition(struct cursor* c)

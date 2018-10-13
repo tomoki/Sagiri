@@ -10,6 +10,7 @@ enum ast_type {
     AST_MINUS,
     AST_COMPOUND_STATEMENT,
     AST_IF_ELSE_STATEMENT,
+    AST_DECLARATION,
 };
 
 struct ast {
@@ -44,6 +45,11 @@ struct ast {
             struct ast* body;
             // TODO: add return type
         } function_definition;
+
+        // DECLARATION
+        struct {
+            struct ast* initializer;
+        } declaration;
 
         struct {
             struct ast* left;

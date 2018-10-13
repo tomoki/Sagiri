@@ -58,6 +58,9 @@ void compile_rec(struct ast* a, struct state* s)
                 compile_rec(a->value.if_else_statement.false_statement, s);
             printf(".L%d:\n", el);
             break;
+        case AST_DECLARATION:
+            // FIXME: Implement here
+            break;
         default:
             error("not implemented");
     }
