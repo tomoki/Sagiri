@@ -417,7 +417,7 @@ struct ast* jump_statement(struct cursor* c)
         expect_punctuator(semicolon_token, PUNC_SEMICOLON);
         proceed(c);
 
-        struct ast* ret = new_ast(RETURN_STATEMENT);
+        struct ast* ret = new_ast(AST_RETURN_STATEMENT);
         ret->value.exp = exp;
         return ret;
     }
@@ -533,7 +533,7 @@ struct ast* function_definition(struct cursor* c)
     // body
     struct ast* st = compound_statement(c);
 
-    struct ast* ret = new_ast(FUNCTION_DEFINITION);
+    struct ast* ret = new_ast(AST_FUNCTION_DEFINITION);
     ret->value.function_definition.function_name = function_name->value.identifier.start;
     ret->value.function_definition.function_name_length = function_name->value.identifier.length;
     ret->value.function_definition.body = st;
@@ -543,7 +543,7 @@ struct ast* function_definition(struct cursor* c)
 
 struct ast* translation_unit(struct cursor* c)
 {
-    struct ast* translation_unit = new_ast(TOPLEVEL_AST);
+    struct ast* translation_unit = new_ast(AST_TOPLEVEL);
     while(peek(c) != NULL) {
         translation_unit->value.toplevel.asts[translation_unit->value.toplevel.ast_len++] = function_definition(c);
     }

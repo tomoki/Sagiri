@@ -9,7 +9,7 @@
 void compile_rec(struct ast* a, struct state* s)
 {
     switch (a->type) {
-        case RETURN_STATEMENT:
+        case AST_RETURN_STATEMENT:
             compile_rec(a->value.exp, s);
             printf(
                 "\tpopq %%rax\n"
@@ -89,7 +89,7 @@ void compile_toplevel(struct ast* a, struct state* s)
     struct ast* top = s->toplevel_ast;
     for (int i = 0; i < top->value.toplevel.ast_len; i++) {
         struct ast* t = top->value.toplevel.asts[i];
-        if (t->type == FUNCTION_DEFINITION)
+        if (t->type == AST_FUNCTION_DEFINITION)
             compile_function(t, s);
     }
 }
