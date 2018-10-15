@@ -14,6 +14,11 @@ enum ast_type {
     AST_DECLARATION,
 };
 
+struct identifier {
+    char* name;
+    int length;
+};
+
 struct ast {
     enum ast_type type;
 
@@ -43,20 +48,24 @@ struct ast {
 
         // IDENTIFIER REFERENCE
         struct {
-            char* name;
-            int length;
-        } identifier;
+            struct identifier identifier;
+            int type;
+            int var_index; // in function
+        } identifier_reference;
 
         // FUNCTION_DEFINITION
         struct {
-            char* function_name;
-            int function_name_length;
+            struct identifier function_name;
             struct ast* body;
             // TODO: add return type
+            int number_of_vars;
         } function_definition;
 
         // DECLARATION
         struct {
+            // FIXME: should be multiple identifier
+            struct identifier identifier;
+            int var_index;
             struct ast* initializer;
         } declaration;
 

@@ -107,8 +107,8 @@ struct ast* primary_expression(struct cursor* c)
     if (next_token->type == TOKEN_IDENTIFIER) {
         proceed(c);
         struct ast* ret = new_ast(AST_IDENTIFIER);
-        ret->value.identifier.name = next_token->value.identifier.start;
-        ret->value.identifier.length = next_token->value.identifier.length;
+        ret->value.identifier_reference.identifier.name = next_token->value.identifier.start;
+        ret->value.identifier_reference.identifier.length = next_token->value.identifier.length;
         return ret;
     } else if (next_token->type == TOKEN_INTEGER)
         return integer_literal(c);
@@ -489,6 +489,8 @@ struct ast* declaration(struct cursor* c)
 
 
     // FIXME: Assume it is integer.
+    //   int a = integer;
+    //   int a;
     expect_keyword(peek(c), KEY_INT);
     proceed(c);
 
@@ -498,6 +500,8 @@ struct ast* declaration(struct cursor* c)
         error("Found non identifier on declaration");
 
     struct ast* ret = new_ast(AST_DECLARATION);
+    ret->value.declaration.identifier.name = ident->value.identifier.start;
+    ret->value.declaration.identifier.length = ident->value.identifier.length;
     if (is_punctuator(peek(c), PUNC_EQUAL)) {
         proceed(c);
         ret->value.declaration.initializer = assignment_expression(c);
@@ -534,8 +538,8 @@ struct ast* function_definition(struct cursor* c)
     struct ast* st = compound_statement(c);
 
     struct ast* ret = new_ast(AST_FUNCTION_DEFINITION);
-    ret->value.function_definition.function_name = function_name->value.identifier.start;
-    ret->value.function_definition.function_name_length = function_name->value.identifier.length;
+    ret->value.function_definition.function_name.name = function_name->value.identifier.start;
+    ret->value.function_definition.function_name.length = function_name->value.identifier.length;
     ret->value.function_definition.body = st;
 
     return ret;
