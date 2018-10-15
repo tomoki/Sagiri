@@ -198,9 +198,7 @@ void compile_function(struct ast* a, struct state* s)
     printf("\tpushq %%rbp\n"
            "\tmovq %%rsp, %%rbp\n");
 
-    if (a->value.function_definition.number_of_vars > 0) {
-        printf("\tsubq $%d, %%rsp\n", a->value.function_definition.number_of_vars * 8);
-    }
+    printf("\tsubq $%d, %%rsp\n", a->value.function_definition.number_of_vars * 8);
     compile_rec(a->value.function_definition.body, a, s);
 }
 
