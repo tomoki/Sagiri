@@ -204,10 +204,18 @@ void compile_function(struct ast* a, struct state* s)
 
 void compile_toplevel(struct state* s)
 {
-    printf(
-        "\t.text\n"
-        "\t.globl my_main\n");
     struct ast* top = s->toplevel_ast;
+    printf("\t.text\n");
+    for (int i = 0; i < top->value.toplevel.ast_len; i++) {
+        struct ast* t = top->value.toplevel.asts[i];
+        if (t->type == AST_FUNCTION_DEFINITION) {
+            char name[256];
+            strncpy(name, t->value.function_definition.function_name.name, t->value.function_definition.function_name.length);
+            name[t->value.function_definition.function_name.length] = '\0';
+            printf("\t.globl %s\n", name);
+        }
+    }
+
     for (int i = 0; i < top->value.toplevel.ast_len; i++) {
         struct ast* t = top->value.toplevel.asts[i];
         if (t->type == AST_FUNCTION_DEFINITION)

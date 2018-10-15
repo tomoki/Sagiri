@@ -43,5 +43,6 @@ test: $(EXE)
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/multi-if4.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/variable-in-function.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/variable-in-function-use.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/multiple-function-just-def.c $(ROOT)/test/startup.c
 
 .PHONY: clean test
