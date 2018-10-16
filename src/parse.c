@@ -134,7 +134,15 @@ struct ast* postfix_expression(struct cursor* c)
     // postfix-expression --
     // ( type-name ) { initializer-list }
     // ( type-name ) { initializer-list , }
-    return primary_expression(c);
+    struct ast* ret = primary_expression(c);
+    // if (is_punctuator(peek(c), PUNC_LEFT_PAREN)) {
+    //     // function call
+    //     proceed(c); // (
+    //     // FIXME: assume it doesn't have argument.
+    //     expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
+    //     proceed(c);
+    // }
+    return ret;
 }
 
 struct ast* unary_expression(struct cursor* c)
@@ -439,7 +447,7 @@ struct ast* statement(struct cursor* c)
         error("Reach EOF until parsing statement");
 
     // compound-statement
-    if (is_punctuator(first_token, PUNC_LEFT_PAREN))
+    if (is_punctuator(first_token, PUNC_LEFT_CURLY))
         return compound_statement(c);
 
     // jump-statement
