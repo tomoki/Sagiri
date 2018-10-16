@@ -43,7 +43,9 @@ test: $(EXE)
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/multi-if4.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/variable-in-function.c $(ROOT)/test/startup.c
 	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/variable-in-function-use.c $(ROOT)/test/startup.c
-	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/multiple-function-just-def.c $(ROOT)/test/startup.c
-	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/multiple-function-use.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/shadowing-1.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/shadowing-2.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/two-functions-just-def.c $(ROOT)/test/startup.c
+	@ $(ROOT)/test/test.sh $(abspath $(EXE)) $(ROOT)/test/case/two-functions-use.c $(ROOT)/test/startup.c
 
 .PHONY: clean test
