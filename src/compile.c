@@ -21,6 +21,7 @@ struct environment {
 struct environment* new_environment(struct environment* parent)
 {
     struct environment* ret = malloc(sizeof(struct environment));
+    memset(ret, 0, sizeof(struct environment));
     ret->parent = parent;
     return ret;
 }
@@ -39,7 +40,7 @@ int refer_identifier(struct environment* env, struct identifier ident, int *var_
     }
 
     if (env->parent)
-        return refer_identifier(env, ident, var_index);
+        return refer_identifier(env->parent, ident, var_index);
     return 0;
 }
 
