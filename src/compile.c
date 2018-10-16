@@ -32,7 +32,7 @@ int refer_identifier(struct environment* env, struct identifier ident, int *var_
         error("refer_identifier got null env");
 
     for (int i = 0; i < env->defines; i++) {
-        int ilen = ident.length >= env->keys[i].length ? ident.length : env->keys[i].length;;
+        int ilen = ident.length >= env->keys[i].length ? ident.length : env->keys[i].length;
         if (strncmp(ident.name, env->keys[i].name, ilen) == 0) {
             *var_index = env->indexes[i];
             return 1;
@@ -183,7 +183,7 @@ void compile_rec(struct ast* a, struct ast* function, struct state* s)
             }
             break;
         case AST_IDENTIFIER:
-            printf("\tpushq -%d(%%rbp)\n", (a->value.declaration.var_index+1)*8);
+            printf("\tpushq -%d(%%rbp)\n", (a->value.identifier_reference.var_index+1)*8);
             break;
         default:
             error("not implemented");
