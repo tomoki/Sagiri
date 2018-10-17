@@ -135,13 +135,16 @@ struct ast* postfix_expression(struct cursor* c)
     // ( type-name ) { initializer-list }
     // ( type-name ) { initializer-list , }
     struct ast* ret = primary_expression(c);
-    // if (is_punctuator(peek(c), PUNC_LEFT_PAREN)) {
-    //     // function call
-    //     proceed(c); // (
-    //     // FIXME: assume it doesn't have argument.
-    //     expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
-    //     proceed(c);
-    // }
+    if (is_punctuator(peek(c), PUNC_LEFT_PAREN)) {
+        // function call
+        proceed(c); // (
+        // FIXME: assume it doesn't have argument.
+        expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
+        proceed(c);
+        struct ast* new_ret = new_ast(AST_FUNCTION_CALL);
+        new_ret->value.function_call.function = ret;
+        ret = new_ret;
+    }
     return ret;
 }
 

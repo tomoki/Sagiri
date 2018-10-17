@@ -12,6 +12,7 @@ enum ast_type {
     AST_COMPOUND_STATEMENT,
     AST_IF_ELSE_STATEMENT,
     AST_DECLARATION,
+    AST_FUNCTION_CALL,
 };
 
 struct identifier {
@@ -60,6 +61,11 @@ struct ast {
             // TODO: add return type
             int number_of_vars;
         } function_definition;
+
+        // FUNCTION_CALL
+        struct {
+            struct ast* function;
+        } function_call;
 
         // DECLARATION
         struct {

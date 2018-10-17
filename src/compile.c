@@ -90,6 +90,10 @@ void scan_variables(struct ast* a, struct environment* env, int* var_index, stru
             break;
         }
 
+        case AST_FUNCTION_CALL: {
+            // FIXME: Should scan functions
+        }
+
         // primitives other than identifier, do nothing
         case AST_INTEGER:
             break;
@@ -182,6 +186,18 @@ void compile_rec(struct ast* a, struct ast* function, struct state* s)
                        "\tmovq %%rax, -%d(%%rbp)\n", (a->value.declaration.var_index+1)*8);
             }
             break;
+        case AST_FUNCTION_CALL:
+            if (a->value.function_call.function->type == AST_IDENTIFIER) {
+                char name[256];
+                strncpy(name,
+                        a->value.function_call.function->value.identifier_reference.identifier.name,
+                        a->value.function_call.function->value.identifier_reference.identifier.length);
+                name[a->value.function_call.function->value.identifier_reference.identifier.length] = '\0';
+                printf("\tcall %s\n", name);
+                printf("\tpushq %%rax\n");
+                break;
+            }
+            error("not implemented");
         case AST_IDENTIFIER:
             printf("\tpushq -%d(%%rbp)\n", (a->value.identifier_reference.var_index+1)*8);
             break;
