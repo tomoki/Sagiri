@@ -55,7 +55,7 @@ void scan_variables(struct ast* a, struct environment* env, int* var_index, stru
         case AST_ADD:
         case AST_MINUS:
             scan_variables(a->value.binary_operator.left, env, var_index, s);
-            scan_variables(a->value.binary_operator.left, env, var_index, s);
+            scan_variables(a->value.binary_operator.right, env, var_index, s);
             break;
 
         case AST_IF_ELSE_STATEMENT:
@@ -119,6 +119,12 @@ void scan_variables_toplevel(struct state* s)
         struct ast* t = top->value.toplevel.asts[i];
         if (t->type == AST_FUNCTION_DEFINITION) {
             struct environment* function_env = new_environment(global_env);
+            for (int i = 0; i < t->value.function_definition.number_of_parameters; i++) {
+                function_env->keys[function_env->defines] = t->value.function_definition.parameters[i];
+                function_env->indexes[function_env->defines] = i;
+                function_env->defines++;
+            }
+            t->value.function_definition.number_of_vars = t->value.function_definition.number_of_parameters;
             // TODO: scan arguments
             // FIXME: body should not new have environment
             scan_variables(t->value.function_definition.body, function_env, &(t->value.function_definition.number_of_vars), s);

@@ -1,6 +1,9 @@
 #ifndef PARSER_H_INCLUDED
 #define PARSER_H_INCLUDED
 
+// FIXME: identifier should be different header
+#include "lex.h"
+
 enum ast_type {
     AST_TOPLEVEL,
     AST_FUNCTION_DEFINITION,
@@ -13,11 +16,6 @@ enum ast_type {
     AST_IF_ELSE_STATEMENT,
     AST_DECLARATION,
     AST_FUNCTION_CALL,
-};
-
-struct identifier {
-    char* name;
-    int length;
 };
 
 struct ast {
@@ -58,13 +56,18 @@ struct ast {
         struct {
             struct identifier function_name;
             struct ast* body;
-            // TODO: add return type
             int number_of_vars;
+            // TODO: add return type
+            // TODO: add parameters type.
+            int number_of_parameters;
+            struct identifier parameters[100];
         } function_definition;
 
         // FUNCTION_CALL
         struct {
             struct ast* function;
+            struct ast* arguments[100];
+            int number_of_arguments;
         } function_call;
 
         // DECLARATION

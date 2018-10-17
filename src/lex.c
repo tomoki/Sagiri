@@ -187,7 +187,7 @@ int do_lex(struct cursor* c, struct state* s)
                 if (!is_keyword) {
                     // Normal identifier
                     s->tokens[k].type = TOKEN_IDENTIFIER;
-                    s->tokens[k].value.identifier.start = &(c->code[c->where]);
+                    s->tokens[k].value.identifier.name = &(c->code[c->where]);
                     s->tokens[k].value.identifier.length = ident_len;
                     k++;
                     c->where += ident_len;

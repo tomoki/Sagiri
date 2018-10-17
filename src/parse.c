@@ -5,6 +5,7 @@
 #include "util.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 void expect(struct token* t, enum token_type e)
@@ -61,6 +62,7 @@ struct cursor
 struct ast* new_ast(enum ast_type type)
 {
     struct ast* ret = malloc(sizeof(struct ast));
+    memset(ret, 0, sizeof(struct ast));
     ret->type = type;
     return ret;
 }
@@ -107,7 +109,7 @@ struct ast* primary_expression(struct cursor* c)
     if (next_token->type == TOKEN_IDENTIFIER) {
         proceed(c);
         struct ast* ret = new_ast(AST_IDENTIFIER);
-        ret->value.identifier_reference.identifier.name = next_token->value.identifier.start;
+        ret->value.identifier_reference.identifier.name = next_token->value.identifier.name;
         ret->value.identifier_reference.identifier.length = next_token->value.identifier.length;
         return ret;
     } else if (next_token->type == TOKEN_INTEGER)
@@ -138,12 +140,19 @@ struct ast* postfix_expression(struct cursor* c)
     if (is_punctuator(peek(c), PUNC_LEFT_PAREN)) {
         // function call
         proceed(c); // (
-        // FIXME: assume it doesn't have argument.
-        expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
-        proceed(c);
         struct ast* new_ret = new_ast(AST_FUNCTION_CALL);
         new_ret->value.function_call.function = ret;
         ret = new_ret;
+        new_ret->value.function_call.number_of_arguments = 0;
+        while (!is_punctuator(peek(c), PUNC_RIGHT_PAREN)) {
+            struct ast* arg = expression(c);
+            ret->value.function_call.arguments[ret->value.function_call.number_of_arguments++] = arg;
+            if (is_punctuator(peek(c), PUNC_COMMA))
+                proceed(c);
+            else
+                expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
+        }
+        proceed(c); // )
     }
     return ret;
 }
@@ -511,7 +520,7 @@ struct ast* declaration(struct cursor* c)
         error("Found non identifier on declaration");
 
     struct ast* ret = new_ast(AST_DECLARATION);
-    ret->value.declaration.identifier.name = ident->value.identifier.start;
+    ret->value.declaration.identifier.name = ident->value.identifier.name;
     ret->value.declaration.identifier.length = ident->value.identifier.length;
     if (is_punctuator(peek(c), PUNC_EQUAL)) {
         proceed(c);
@@ -526,6 +535,8 @@ struct ast* declaration(struct cursor* c)
 
 struct ast* function_definition(struct cursor* c)
 {
+    struct ast* ret = new_ast(AST_FUNCTION_DEFINITION);
+
     // return type
     struct token* return_type = peek(c);
     // FIXME: identifier or keyword?
@@ -540,16 +551,29 @@ struct ast* function_definition(struct cursor* c)
     expect_punctuator(left_paren, PUNC_LEFT_PAREN);
     proceed(c);
 
-    // )
-    struct token* right_paren = peek(c);
-    expect_punctuator(right_paren, PUNC_RIGHT_PAREN);
-    proceed(c);
+    // FIXME: assume it's integer.
+    while (!is_punctuator(peek(c), PUNC_RIGHT_PAREN)) {
+        expect_keyword(peek(c), KEY_INT);
+        proceed(c);
+
+        if (peek(c)->type != TOKEN_IDENTIFIER)
+            error("identifier required");
+
+        ret->value.function_definition.parameters[ret->value.function_definition.number_of_parameters++] = peek(c)->value.identifier;
+        proceed(c);
+
+        if (is_punctuator(peek(c), PUNC_COMMA))
+            proceed(c);
+        else
+            expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
+    }
+    expect_punctuator(peek(c), PUNC_RIGHT_PAREN);
+    proceed(c); // )
 
     // body
     struct ast* st = compound_statement(c);
 
-    struct ast* ret = new_ast(AST_FUNCTION_DEFINITION);
-    ret->value.function_definition.function_name.name = function_name->value.identifier.start;
+    ret->value.function_definition.function_name.name = function_name->value.identifier.name;
     ret->value.function_definition.function_name.length = function_name->value.identifier.length;
     ret->value.function_definition.body = st;
 

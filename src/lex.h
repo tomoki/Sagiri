@@ -42,6 +42,10 @@ enum keyword {
     KEY__IMAGINARD
 };
 
+struct identifier {
+    char* name;
+    int length;
+};
 
 // sorted by length
 enum punctuator {
@@ -111,10 +115,7 @@ struct token {
     enum token_type type;
     union value_type {
         int integer;
-        struct {
-            char* start;
-            int length;
-        } identifier;
+        struct identifier identifier;
         enum keyword keyword;
         enum punctuator punctuator;
     } value;
