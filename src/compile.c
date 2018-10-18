@@ -110,6 +110,10 @@ void scan_variables(struct ast* a, struct environment* env, int* var_index, stru
     return;
 }
 
+char parameter_registers[][256] = {
+    "rdi", "rsi", "rdx", "rcx", "r8", "r9"
+};
+
 void scan_variables_toplevel(struct state* s)
 {
     struct ast* top = s->toplevel_ast;
@@ -194,6 +198,13 @@ void compile_rec(struct ast* a, struct ast* function, struct state* s)
             break;
         case AST_FUNCTION_CALL:
             if (a->value.function_call.function->type == AST_IDENTIFIER) {
+                // push arguments
+                for (int i = 0; i < a->value.function_call.number_of_arguments; i++) {
+                    struct ast* arg = a->value.function_call.arguments[i];
+                    compile_rec(arg, function, s);
+                    printf("\tpopq %%rax\n");
+                    printf("\tmovq %%rax, %%%s\n", parameter_registers[i]);
+                }
                 char name[256];
                 strncpy(name,
                         a->value.function_call.function->value.identifier_reference.identifier.name,
@@ -220,6 +231,10 @@ void compile_function(struct ast* a, struct state* s)
     printf(":\n");
     printf("\tpushq %%rbp\n"
            "\tmovq %%rsp, %%rbp\n");
+
+    // copy arguments
+    for (int i = 0; i < a->value.function_definition.number_of_parameters; i++)
+        printf("\tmovq %%%s, -%d(%%rbp)\n", parameter_registers[i], (i+1) * 8);
 
     printf("\tsubq $%d, %%rsp\n", a->value.function_definition.number_of_vars * 8);
     compile_rec(a->value.function_definition.body, a, s);
