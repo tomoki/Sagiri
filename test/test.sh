@@ -22,22 +22,22 @@ then
         d=`diff $expected $out -Z`
         if [ ${#d} -eq 0 ]
         then
-            echo -e " => \033[0;32mPass\033[0;39m"
+            printf " => \033[0;32mPass\033[0;39m\n"
             rm -f $asm $obj $startupobj $exe $out
         else
-            echo -e " => \033[0;31mFailed\033[0;39m"
-            echo "Expected:"
+            printf " => \033[0;31mFailed\033[0;39m\n"
+            printf "Expected:\n"
             cat $expected
-            echo "Output:"
+            printf "Output:\n"
             cat $out
             rm -f $asm $obj $startupobj $exe $out
         fi
         exit 0
     else
-        echo -e " => \033[0;31mFailed <- $expected not found\033[0;39m"
+        printf " => \033[0;31mFailed because %s not found\033[0;39m\n" "$expected"
         exit 0
     fi
 else
-    echo -e " => \033[0;31mFailed <- $program not found\033[0;39m"
+    printf " => \033[0;31mFailed because %s not found\033[0;39m\n" "$program"
     exit 0
 fi
