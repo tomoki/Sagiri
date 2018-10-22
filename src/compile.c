@@ -48,6 +48,7 @@ void scan_variables(struct ast* a, struct environment* env, int* var_index, stru
 {
     switch (a->type) {
         case AST_RETURN_STATEMENT:
+        case AST_EXPRESSION_STATEMENT:
             scan_variables(a->value.exp, env, var_index, s);
             break;
 
@@ -103,6 +104,7 @@ void scan_variables(struct ast* a, struct environment* env, int* var_index, stru
         case AST_FUNCTION_DEFINITION:
             error("should not reach");
             break;
+
         default:
             error("not implemented");
             break;
@@ -217,6 +219,10 @@ void compile_rec(struct ast* a, struct ast* function, struct state* s)
             error("not implemented");
         case AST_IDENTIFIER:
             printf("\tpushq -%d(%%rbp)\n", (a->value.identifier_reference.var_index+1)*8);
+            break;
+        case AST_EXPRESSION_STATEMENT:
+            compile_rec(a->value.exp, function, s);
+            printf("\tpopq %%rax\n");
             break;
         default:
             error("not implemented");

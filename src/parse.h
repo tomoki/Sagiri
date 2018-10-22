@@ -16,6 +16,7 @@ enum ast_type {
     AST_IF_ELSE_STATEMENT,
     AST_DECLARATION,
     AST_FUNCTION_CALL,
+    AST_EXPRESSION_STATEMENT,
 };
 
 struct ast {

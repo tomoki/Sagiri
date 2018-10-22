@@ -373,8 +373,12 @@ struct ast* compound_statement(struct cursor* c)
 
 struct ast* expression_statement(struct cursor* c)
 {
-    // expression opt;
-    error("not implemented");
+    struct ast* exp = expression(c);
+    expect_punctuator(peek(c), PUNC_SEMICOLON);
+    proceed(c);
+    struct ast* exp_statement = new_ast(AST_EXPRESSION_STATEMENT);
+    exp_statement->value.exp = exp;\
+    return exp_statement;
 }
 
 struct ast* selection_statement(struct cursor* c)
