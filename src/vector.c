@@ -37,7 +37,7 @@ void* vector_at(struct vector* v, int index)
     if (index >= v->length)
         error("Access to outside of vector");
 
-    return v + v->element_size * index;
+    return v->ptr + v->element_size * index;
 }
 
 void* vector_put(struct vector* v, int index, void* p)
@@ -56,7 +56,7 @@ void* vector_push_back(struct vector* v, void* p)
         vector_expand(v);
 
     v->length++;
-    return vector_put(v, v->length, p);
+    return vector_put(v, v->length-1, p);
 }
 
 // private functions
