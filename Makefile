@@ -5,6 +5,7 @@ SRCS =  src/main.c \
 		src/lex.c \
 		src/parse.c \
 		src/compile.c \
+		src/vector.c \
 		src/util.c \
 
 CFLAGS = -Wall -g
