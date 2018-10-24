@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VECTOR_H_INCLUDED
+#define VECTOR_H_INCLUDED
 
 #include <stddef.h>
 
@@ -25,3 +26,5 @@ void* vector_put(struct vector*, int, void*);
 int vector_length(struct vector*);
 // T* vector_push_back(vector<T>, T*)
 void* vector_push_back(struct vector*, void*);
+
+#endif
