@@ -143,10 +143,10 @@ struct ast* postfix_expression(struct cursor* c)
         struct ast* new_ret = new_ast(AST_FUNCTION_CALL);
         new_ret->value.function_call.function = ret;
         ret = new_ret;
-        new_ret->value.function_call.number_of_arguments = 0;
+        new_ret->value.function_call.arguments = vector_new(sizeof(struct ast*));
         while (!is_punctuator(peek(c), PUNC_RIGHT_PAREN)) {
             struct ast* arg = expression(c);
-            ret->value.function_call.arguments[ret->value.function_call.number_of_arguments++] = arg;
+            vector_push_back(ret->value.function_call.arguments, &arg);
             if (is_punctuator(peek(c), PUNC_COMMA))
                 proceed(c);
             else
@@ -319,7 +319,7 @@ struct ast* compound_statement(struct cursor* c)
     //    statement
 
     struct ast* ret = new_ast(AST_COMPOUND_STATEMENT);
-    ret->value.compound_statement.ast_len = 0;
+    ret->value.compound_statement.asts = vector_new(sizeof(struct ast*));
 
     struct token* left_curly = peek(c);
     expect_punctuator(left_curly, PUNC_LEFT_CURLY);
@@ -331,6 +331,7 @@ struct ast* compound_statement(struct cursor* c)
             break;
 
         // FIXME: allow tyoedef
+        struct ast* statement_or_declaration;
         if (// storage-class-specifier
             is_keyword(next_token, KEY_TYPEDEF)  ||
             is_keyword(next_token, KEY_EXTERN)   ||
@@ -359,9 +360,11 @@ struct ast* compound_statement(struct cursor* c)
             is_keyword(next_token, KEY_VOLATILE) ||
             // function-specifier
             is_keyword(next_token, KEY_INLINE))
-            ret->value.compound_statement.asts[ret->value.compound_statement.ast_len++] = declaration(c);
+            statement_or_declaration = declaration(c);
         else
-            ret->value.compound_statement.asts[ret->value.compound_statement.ast_len++] = statement(c);
+            statement_or_declaration = statement(c);
+
+        vector_push_back(ret->value.compound_statement.asts, &statement_or_declaration);
     }
 
     struct token* right_curly = peek(c);
@@ -540,6 +543,7 @@ struct ast* declaration(struct cursor* c)
 struct ast* function_definition(struct cursor* c)
 {
     struct ast* ret = new_ast(AST_FUNCTION_DEFINITION);
+    ret->value.function_definition.parameters = vector_new(sizeof(struct identifier));
 
     // return type
     struct token* return_type = peek(c);
@@ -563,7 +567,7 @@ struct ast* function_definition(struct cursor* c)
         if (peek(c)->type != TOKEN_IDENTIFIER)
             error("identifier required");
 
-        ret->value.function_definition.parameters[ret->value.function_definition.number_of_parameters++] = peek(c)->value.identifier;
+        vector_push_back(ret->value.function_definition.parameters, &(peek(c)->value.identifier));
         proceed(c);
 
         if (is_punctuator(peek(c), PUNC_COMMA))
@@ -587,8 +591,10 @@ struct ast* function_definition(struct cursor* c)
 struct ast* translation_unit(struct cursor* c)
 {
     struct ast* translation_unit = new_ast(AST_TOPLEVEL);
+    translation_unit->value.toplevel.asts = vector_new(sizeof(struct ast*));
     while(peek(c) != NULL) {
-        translation_unit->value.toplevel.asts[translation_unit->value.toplevel.ast_len++] = function_definition(c);
+        struct ast* function_def = function_definition(c);
+        vector_push_back(translation_unit->value.toplevel.asts, &function_def);
     }
     return translation_unit;
 }

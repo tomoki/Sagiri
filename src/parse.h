@@ -3,6 +3,7 @@
 
 // FIXME: identifier should be different header
 #include "lex.h"
+#include "vector.h"
 
 enum ast_type {
     AST_TOPLEVEL,
@@ -25,8 +26,8 @@ struct ast {
     union {
         // compound statement
         struct {
-            struct ast* asts[100];
-            int ast_len;
+            // vector<struct ast*>
+            struct vector* asts;
         } compound_statement;
 
         // if-else statement
@@ -37,8 +38,8 @@ struct ast {
         } if_else_statement;
 
         struct {
-            struct ast* asts[100];
-            int ast_len;
+            // vector<struct ast*>
+            struct vector* asts;
         } toplevel;
 
         struct ast* exp;
@@ -60,15 +61,15 @@ struct ast {
             int number_of_vars;
             // TODO: add return type
             // TODO: add parameters type.
-            int number_of_parameters;
-            struct identifier parameters[100];
+            // vector<struct identifier>
+            struct vector* parameters;
         } function_definition;
 
         // FUNCTION_CALL
         struct {
             struct ast* function;
-            struct ast* arguments[100];
-            int number_of_arguments;
+            // vector<struct ast*>
+            struct vector* arguments;
         } function_call;
 
         // DECLARATION

@@ -68,8 +68,8 @@ void scan_variables(struct ast* a, struct environment* env, int* var_index, stru
 
         case AST_COMPOUND_STATEMENT: {
             struct environment* e = new_environment(env);
-            for(int i = 0; i < a->value.compound_statement.ast_len; i++)
-                scan_variables(a->value.compound_statement.asts[i], e, var_index, s);
+            for(int i = 0; i < vector_length(a->value.compound_statement.asts); i++)
+                scan_variables(*(struct ast**) vector_at(a->value.compound_statement.asts, i), e, var_index, s);
             break;
         }
 
@@ -121,16 +121,16 @@ void scan_variables_toplevel(struct state* s)
     struct ast* top = s->toplevel_ast;
     struct environment* global_env = new_environment(0);
 
-    for (int i = 0; i < top->value.toplevel.ast_len; i++) {
-        struct ast* t = top->value.toplevel.asts[i];
+    for (int i = 0; i < vector_length(top->value.toplevel.asts); i++) {
+        struct ast* t = *(struct ast**) vector_at(top->value.toplevel.asts, i);
         if (t->type == AST_FUNCTION_DEFINITION) {
             struct environment* function_env = new_environment(global_env);
-            for (int i = 0; i < t->value.function_definition.number_of_parameters; i++) {
-                function_env->keys[function_env->defines] = t->value.function_definition.parameters[i];
+            for (int i = 0; i < vector_length(t->value.function_definition.parameters); i++) {
+                function_env->keys[function_env->defines] = *(struct identifier*) vector_at(t->value.function_definition.parameters, i);
                 function_env->indexes[function_env->defines] = i;
                 function_env->defines++;
             }
-            t->value.function_definition.number_of_vars = t->value.function_definition.number_of_parameters;
+            t->value.function_definition.number_of_vars = vector_length(t->value.function_definition.parameters);
             // TODO: scan arguments
             // FIXME: body should not new have environment
             scan_variables(t->value.function_definition.body, function_env, &(t->value.function_definition.number_of_vars), s);
@@ -173,8 +173,8 @@ void compile_rec(struct ast* a, struct ast* function, struct state* s)
             printf("\tpushq $%d\n", a->value.integer);
             break;
         case AST_COMPOUND_STATEMENT:
-            for (int i = 0; i < a->value.compound_statement.ast_len; i++) {
-                compile_rec(a->value.compound_statement.asts[i], function, s);
+            for (int i = 0; i < vector_length(a->value.compound_statement.asts); i++) {
+                compile_rec(*(struct ast**)vector_at(a->value.compound_statement.asts, i), function, s);
             }
             break;
         case AST_IF_ELSE_STATEMENT:
@@ -201,8 +201,8 @@ void compile_rec(struct ast* a, struct ast* function, struct state* s)
         case AST_FUNCTION_CALL:
             if (a->value.function_call.function->type == AST_IDENTIFIER) {
                 // push arguments
-                for (int i = 0; i < a->value.function_call.number_of_arguments; i++) {
-                    struct ast* arg = a->value.function_call.arguments[i];
+                for (int i = 0; i < vector_length(a->value.function_call.arguments); i++) {
+                    struct ast* arg = *(struct ast**) vector_at(a->value.function_call.arguments, i);
                     compile_rec(arg, function, s);
                     printf("\tpopq %%rax\n");
                     printf("\tmovq %%rax, %%%s\n", parameter_registers[i]);
@@ -239,7 +239,7 @@ void compile_function(struct ast* a, struct state* s)
            "\tmovq %%rsp, %%rbp\n");
 
     // copy arguments
-    for (int i = 0; i < a->value.function_definition.number_of_parameters; i++)
+    for (int i = 0; i < vector_length(a->value.function_definition.parameters); i++)
         printf("\tmovq %%%s, -%d(%%rbp)\n", parameter_registers[i], (i+1) * 8);
 
     printf("\tsubq $%d, %%rsp\n", a->value.function_definition.number_of_vars * 8);
@@ -250,8 +250,8 @@ void compile_toplevel(struct state* s)
 {
     struct ast* top = s->toplevel_ast;
     printf("\t.text\n");
-    for (int i = 0; i < top->value.toplevel.ast_len; i++) {
-        struct ast* t = top->value.toplevel.asts[i];
+    for (int i = 0; i < vector_length(top->value.toplevel.asts); i++) {
+        struct ast* t = *(struct ast**)vector_at(top->value.toplevel.asts, i);
         if (t->type == AST_FUNCTION_DEFINITION) {
             char name[256];
             strncpy(name, t->value.function_definition.function_name.name, t->value.function_definition.function_name.length);
@@ -260,8 +260,8 @@ void compile_toplevel(struct state* s)
         }
     }
 
-    for (int i = 0; i < top->value.toplevel.ast_len; i++) {
-        struct ast* t = top->value.toplevel.asts[i];
+    for (int i = 0; i < vector_length(top->value.toplevel.asts); i++) {
+        struct ast* t = *(struct ast**)vector_at(top->value.toplevel.asts, i);
         if (t->type == AST_FUNCTION_DEFINITION)
             compile_function(t, s);
     }
