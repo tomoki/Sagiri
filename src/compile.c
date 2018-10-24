@@ -3,6 +3,7 @@
 #include "parse.h"
 #include "state.h"
 #include "util.h"
+#include "vector.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -12,10 +13,12 @@
 struct environment {
     struct environment* parent;
 
-    struct identifier keys[100];
-    int indexes[100];
-    int types[100];
-    int defines;
+    // vector<struct identifier>
+    struct vector* keys;
+    // vector<int> indexes
+    struct vector* indexes;
+    // vector<int> types
+    struct vector* types;
 };
 
 struct environment* new_environment(struct environment* parent)
@@ -23,6 +26,10 @@ struct environment* new_environment(struct environment* parent)
     struct environment* ret = malloc(sizeof(struct environment));
     memset(ret, 0, sizeof(struct environment));
     ret->parent = parent;
+    ret->keys = vector_new(sizeof(struct identifier));
+    ret->indexes = vector_new(sizeof(int));
+    ret->types = vector_new(sizeof(int));
+
     return ret;
 }
 
@@ -31,10 +38,10 @@ int refer_identifier(struct environment* env, struct identifier ident, int *var_
     if (!env)
         error("refer_identifier got null env");
 
-    for (int i = 0; i < env->defines; i++) {
-        int ilen = ident.length >= env->keys[i].length ? ident.length : env->keys[i].length;
-        if (strncmp(ident.name, env->keys[i].name, ilen) == 0) {
-            *var_index = env->indexes[i];
+    for (int i = 0; i < vector_length(env->keys); i++) {
+        int ilen = ident.length >= ((struct identifier*) vector_at(env->keys, i))->length ? ident.length : ((struct identifier*) vector_at(env->keys, i))->length;
+        if (strncmp(ident.name, ((struct identifier*) vector_at(env->keys, i))->name, ilen) == 0) {
+            *var_index = *(int*) vector_at(env->indexes, i);
             return 1;
         }
     }
@@ -74,10 +81,9 @@ void scan_variables(struct ast* a, struct environment* env, int* var_index, stru
         }
 
         case AST_DECLARATION: {
-            env->keys[env->defines] = a->value.declaration.identifier;
-            env->indexes[env->defines] = *var_index;
+            vector_push_back(env->keys, &(a->value.declaration.identifier));
+            vector_push_back(env->indexes, var_index);
             a->value.declaration.var_index = *var_index;
-            env->defines++;
             (*var_index)++;
             break;
         }
@@ -126,9 +132,8 @@ void scan_variables_toplevel(struct state* s)
         if (t->type == AST_FUNCTION_DEFINITION) {
             struct environment* function_env = new_environment(global_env);
             for (int i = 0; i < vector_length(t->value.function_definition.parameters); i++) {
-                function_env->keys[function_env->defines] = *(struct identifier*) vector_at(t->value.function_definition.parameters, i);
-                function_env->indexes[function_env->defines] = i;
-                function_env->defines++;
+                vector_push_back(function_env->keys, (struct identifier*) vector_at(t->value.function_definition.parameters, i));
+                vector_push_back(function_env->indexes, &i);
             }
             t->value.function_definition.number_of_vars = vector_length(t->value.function_definition.parameters);
             // TODO: scan arguments
